@@ -7,9 +7,27 @@ function stopGame(){if(cleanupGame){cleanupGame();cleanupGame=null;} $('#gameAre
 function showPage(page){stopGame();currentGame=page;$('#homePage').classList.toggle('hidden',page!=='home');$('#gamePage').classList.add('hidden');$('#settingsPage').classList.toggle('hidden',page!=='settings');$('#pageTitle').textContent=pageTitles[page]||pageTitles.home;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===page));if(page==='settings')refreshNetwork();}
 function goHome(){showPage('home');}
 function launch(game){if(game==='settings'){showPage('settings');return;}stopGame();currentGame=game;$('#homePage').classList.add('hidden');$('#settingsPage').classList.add('hidden');$('#gamePage').classList.remove('hidden');$('#pageTitle').textContent=pageTitles[game];$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===game));$('#gameStatus').textContent='READY TO PLAY';$('#restartBtn').onclick=()=>launch(game);if(game==='snake')renderSnake();if(game==='2048')render2048();if(game==='brick')renderBrick();if(game==='grammar')renderGrammar();if(game==='tetris')renderTetris();if(game==='sudoku')renderSudoku();if(game==='flappy')renderFlappy();if(game==='math')renderMathSprint();}
-$$('[data-page]').forEach(b=>b.addEventListener('click',()=>b.dataset.page==='home'?goHome():launch(b.dataset.page)));
-$$('[data-launch]').forEach(b=>b.addEventListener('click',()=>launch(b.dataset.launch)));
-$('#backHome').addEventListener('click',goHome);
+// Use delegated click handling so navigation still works if cards/buttons are
+// recreated by the UI or their inner text/icon is what gets clicked.
+document.addEventListener('click', e => {
+  const pageButton = e.target.closest('[data-page]');
+  if (pageButton) {
+    e.preventDefault();
+    const page = pageButton.dataset.page;
+    if (page === 'home') goHome(); else launch(page);
+    return;
+  }
+  const launchButton = e.target.closest('[data-launch]');
+  if (launchButton) {
+    e.preventDefault();
+    launch(launchButton.dataset.launch);
+    return;
+  }
+  if (e.target.closest('#backHome')) {
+    e.preventDefault();
+    goHome();
+  }
+});
 
 function renderSnake(){
  $('#gameIntro').innerHTML='<h2>Snake Battle <span style="color:#55e6e9">/ AI Arena</span></h2><p>Eat glowing orbs, grow longer, and bait AI snakes into crashing into your body. Your head must avoid every snake body.</p><div class="mode-row"><button class="mode-btn selected" data-mode="easy">🟢 Easy</button><button class="mode-btn" data-mode="hard">🟠 Hard</button><button class="mode-btn" data-mode="devil">😈 Devil</button></div>';
